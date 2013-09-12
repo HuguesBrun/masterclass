@@ -7,11 +7,9 @@ import sys
 
 # load library with MyClass dictionary
 gSystem.Load( 'MyMuon_C' )
-gSystem.Load( 'MyJet_C' )
 
 # get MyClass from ROOT
 from ROOT import MyMuon
-from ROOT import MyJet
 
 args = sys.argv[1:]
 nameSample = str(args[0])
