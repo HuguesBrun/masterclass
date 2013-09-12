@@ -37,7 +37,7 @@ class MyMuon: public TLorentzVector {
       ;
 
       const bool IsIsolated() {
-         return (isolation < 1.);w
+         return (isolation < 1.);
       }
       ;
       const int GetCharge() {
