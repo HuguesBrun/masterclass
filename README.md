@@ -1,6 +1,11 @@
 How to use : 
 ===========
 
+### Get the HEPTutorial tarball and untar it ###
+
+		wget http://ippog.web.cern.ch/sites/ippog.web.cern.ch/files/HEPTutorial.tar_.gz
+		tar -xvzf HEPTutorial.tar_.gz
+
 ### Setup root and pyroot ###
 		
 		source setup.sh
