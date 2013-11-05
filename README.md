@@ -1,12 +1,16 @@
 How to use : 
 ===========
 
---> compile the classes:
-echo .L MyMuon.C+ | root.exe -b
+### Setup root and pyroot ###
+		
+		source setup.sh
 
--->copy the root input file(s) in the directory (or add their path in the python script)
+### link and compile the classes, it also links the root input files ###
 
---> run the python script (here for mc_dy.root):
-python analysis.py mc_dy
+		source mk_links.sh
 
--> contemplate the wonderful histogram you did (here in histos_mc_dy.root)
+### run the python script (here for mc_dy.root) ###
+
+		python analysis.py mc_dy
+
+### contemplate the wonderful histogram you did (here in histos_mc_dy.root) ###
