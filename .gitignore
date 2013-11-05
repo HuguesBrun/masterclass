@@ -1,7 +1,18 @@
+# CODE 
 *.root
+
+# PLOT
 *.pdf
-.DS_*
-*.tar.gz
 *.png
+*.gif
+
+# MAC
+.DS_*
+
+# STUFF
+*.tar.gz
+
+# COMPILED LIBRARIES
 *.o
 *.so
+*.d
