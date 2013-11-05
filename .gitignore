@@ -16,6 +16,7 @@ files
 
 # STUFF
 *.tar.gz
+*.swp
 
 # COMPILED LIBRARIES
 *.o
