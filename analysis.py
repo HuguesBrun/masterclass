@@ -23,41 +23,6 @@ from ROOT import MyElectron
 from ROOT import MyPhoton
 from ROOT import MyJet
 
-def FillTheObjectCollections():
-    for j in xrange(nMuon):
-        muon = MyMuon(chain.Muon_Px[j],chain.Muon_Py[j],chain.Muon_Pz[j],chain.Muon_E[j])
-        muon.SetIsolation(chain.Muon_Iso[j])
-        muon.SetCharge(chain.Muon_Charge[j])
-        AllMuons.append(muon)
-    for j in xrange(nElectron):
-        electron = MyElectron(chain.Electron_Px[j],chain.Electron_Py[j],chain.Electron_Pz[j],chain.Electron_E[j])
-        electron.SetIsolation(chain.Electron_Iso[j])
-        electron.SetCharge(chain.Electron_Charge[j])
-        AllElectrons.append(electron)
-    for j in xrange(nPhoton):
-        photon = MyPhoton(chain.Photon_Px[j],chain.Photon_Py[j],chain.Photon_Pz[j],chain.Photon_E[j])
-        photon.SetIsolation(chain.Photon_Iso[j])
-        AllPhotons.append(photon)
-    for j in xrange(nJet):
-        jet = MyJet(chain.Jet_Px[j],chain.Jet_Py[j],chain.Jet_Pz[j],chain.Jet_E[j])
-        jet.SetBTagDiscriminator(chain.Jet_btag[j])
-        AllJets.append(jet)
-    hadB.SetXYZM(chain.MChadronicBottom_px, chain.MChadronicBottom_py, chain.MChadronicBottom_pz, 4.8);
-    lepB.SetXYZM(chain.MCleptonicBottom_px, chain.MCleptonicBottom_py, chain.MCleptonicBottom_pz, 4.8);
-    hadWq.SetXYZM(chain.MChadronicWDecayQuark_px, chain.MChadronicWDecayQuark_py, chain.MChadronicWDecayQuark_pz, 0.0);
-    hadWqb.SetXYZM(chain.MChadronicWDecayQuarkBar_px, chain.MChadronicWDecayQuarkBar_py, chain.MChadronicWDecayQuarkBar_pz, 0.0);
-    lepWl.SetXYZM(chain.MClepton_px, chain.MClepton_py, chain.MClepton_pz, 0.0);
-    lepWn.SetXYZM(chain.MCneutrino_px, chain.MCneutrino_py, chain.MCneutrino_pz, 0.0);
-    met.SetXYZM(chain.MET_px, chain.MET_py, 0., 0.)
-
-def FillTheOtherCollections():
-    hadB.SetXYZM(chain.MChadronicBottom_px, chain.MChadronicBottom_py, chain.MChadronicBottom_pz, 4.8);
-    lepB.SetXYZM(chain.MCleptonicBottom_px, chain.MCleptonicBottom_py, chain.MCleptonicBottom_pz, 4.8);
-    hadWq.SetXYZM(chain.MChadronicWDecayQuark_px, chain.MChadronicWDecayQuark_py, chain.MChadronicWDecayQuark_pz, 0.0);
-    hadWqb.SetXYZM(chain.MChadronicWDecayQuarkBar_px, chain.MChadronicWDecayQuarkBar_py, chain.MChadronicWDecayQuarkBar_pz, 0.0);
-    lepWl.SetXYZM(chain.MClepton_px, chain.MClepton_py, chain.MClepton_pz, 0.0);
-    lepWn.SetXYZM(chain.MCneutrino_px, chain.MCneutrino_py, chain.MCneutrino_pz, 0.0);
-    met.SetXYZM(chain.MET_px, chain.MET_py, 0., 0.)
 
 def FillThePhotonCollection():
     for j in xrange(nPhoton):
@@ -85,8 +50,16 @@ def FillTheJetCollection():
         jet.SetBTagDiscriminator(chain.Jet_btag[j])
         AllJets.append(jet)
 
-#args = sys.argv[1:]
-#nameSample = str(args[0])
+def FillTheOtherCollections():
+    hadB.SetXYZM(chain.MChadronicBottom_px, chain.MChadronicBottom_py, chain.MChadronicBottom_pz, 4.8);
+    lepB.SetXYZM(chain.MCleptonicBottom_px, chain.MCleptonicBottom_py, chain.MCleptonicBottom_pz, 4.8);
+    hadWq.SetXYZM(chain.MChadronicWDecayQuark_px, chain.MChadronicWDecayQuark_py, chain.MChadronicWDecayQuark_pz, 0.0);
+    hadWqb.SetXYZM(chain.MChadronicWDecayQuarkBar_px, chain.MChadronicWDecayQuarkBar_py, chain.MChadronicWDecayQuarkBar_pz, 0.0);
+    lepWl.SetXYZM(chain.MClepton_px, chain.MClepton_py, chain.MClepton_pz, 0.0);
+    lepWn.SetXYZM(chain.MCneutrino_px, chain.MCneutrino_py, chain.MCneutrino_pz, 0.0);
+    met.SetXYZM(chain.MET_px, chain.MET_py, 0., 0.)
+
+## Sample definitions
 AllSample = ["data","mc_ttbar","mc_wjets","mc_dy","mc_qcd"]
 IntLumiWeight = [1.0, 0.5, 0.5, 0.5, 0.05]
 
@@ -129,15 +102,9 @@ for file in AllSample:
     for i in xrange(nbEntries):
         if(nbEntries > 10000 and i % (nbEntries/10) == 0): print "\tProcessing entry {0} / {1} ({2}% done)".format(i, nbEntries, ceil(float(i)/float(nbEntries)*100.))
         chain.GetEntry(i)
-#        AllElectrons = []; nElectron = chain.NElectron
-#        AllPhotons = []; nPhoton = chain.NPhoton
-#        FillTheObjectCollections()
         TriggerIsoMu24 = chain.triggerIsoMu24
-        
 
 #######################################
-#        NMuons[countFile].Fill(chain.NMuon)
-
 ## TTBar-like selection
 # Trigger
         if(not TriggerIsoMu24): continue
@@ -166,25 +133,6 @@ for file in AllSample:
 # construction of TTBar system
         TTBar = AllMuons[0] + met + AllJets[0] + AllJets[1] + AllJets[2] + AllJets[3]
         invMassSel[countFile].Fill(TTBar.M(), weight)        
-
-#        if(not chain.triggerIsoMu24): continue
-#        if(chain.NMuon < 2): continue
-#        opcharge = AllMuons[0].GetCharge() * AllMuons[1].GetCharge()
-#        if(opcharge != -1): continue
-#        if(AllMuons[0].Pt() < 24.): continue
-#        if(not (AllMuons[0].IsIsolated() and AllMuons[1].IsIsolated())): continue
-#        sumMuon = AllMuons[0] + AllMuons[1]
-#        weight = chain.EventWeight * chain.triggerIsoMu24 * IntLumiWeight[countFile]
-#        invMassSel[countFile].Fill(sumMuon.M(), weight)
-
-#        NElectrons[countFile].Fill(nElectron)
-#        NPhotons[countFile].Fill(nPhoton)
-#        NJets[countFile].Fill(chain.NJet)
-
-#        if (len(AllMuons)<2): continue
-#        sumMuon = AllMuons[0] + AllMuons[1]
-#        invMass[countFile].Fill(sumMuon.M())
-
 
 #######################################
     if(countFile > 0):
