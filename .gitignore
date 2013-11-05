@@ -1,5 +1,10 @@
 # CODE 
+MyElectron.*
+MyMuon.*
+MyPhoton.*
+MyJet.*
 *.root
+files
 
 # PLOT
 *.pdf
