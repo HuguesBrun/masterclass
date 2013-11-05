@@ -1,4 +1,4 @@
-from ROOT import gSystem
+from ROOT import gSystem, gPad
 from ROOT import TChain
 from ROOT import TFile
 from ROOT import TH1F
@@ -21,7 +21,7 @@ from ROOT import MyJet
 
 def FillTheObjectCollections():
     for j in xrange(chain.NMuon):
-        muon = MyMuon(chain.Muon_Px[j],chain.Muon_Py[j],chain.Muon_Py[j],chain.Muon_E[j])
+        muon = MyMuon(chain.Muon_Px[j],chain.Muon_Py[j],chain.Muon_Pz[j],chain.Muon_E[j])
         muon.SetIsolation(chain.Muon_Iso[j])
         muon.SetCharge(chain.Muon_Charge[j]);
         AllMuons.append(muon)
@@ -58,6 +58,7 @@ for file in AllSample:
 
     chain.Add("files/"+nameSample+".root")
     nbEntries = chain.GetEntries()
+#    nbEntries = 1000
     for i in xrange(nbEntries):
         AllMuons = []
         chain.GetEntry(i)
@@ -97,7 +98,7 @@ invMassSel[0].Draw('pesame')
 invMassSel[0].SetMarkerStyle(20)
 invMassSel[0].SetMarkerSize(0.5)
 c.cd(2)
-c.SetLogy(1)
+gPad.SetLogy(1)
 hs.Draw('hist')
 invMassSel[0].Draw('pesame')
 c.Print("InvMass.gif")
