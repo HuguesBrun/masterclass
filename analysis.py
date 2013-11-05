@@ -73,6 +73,7 @@ NMuons = []
 NElectrons = []
 NPhotons = []
 NJets = []
+NBJets = []
 hadB = TLorentzVector()
 lepB = TLorentzVector()
 hadWq = TLorentzVector()
