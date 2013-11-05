@@ -6,6 +6,7 @@ from ROOT import TH1F
 from ROOT import THStack
 from ROOT import TCanvas
 from ROOT import TLorentzVector
+import ROOT as r
 import sys
 gROOT.SetBatch()
 
@@ -62,6 +63,7 @@ def FillTheOtherCollections():
 ## Sample definitions
 AllSample = ["data","mc_ttbar","mc_wjets","mc_dy","mc_qcd"]
 IntLumiWeight = [1.0, 0.5, 0.5, 0.5, 0.05]
+SampleColor = [r.kBlack,r.kRed,r.kGreen,r.kBlue,r.kMagenta]
 
 ## Initialization
 countFile = 0
@@ -88,13 +90,13 @@ for file in AllSample:
 
     chain = TChain("data")
 
-#    invMass[countFile] = TH1F("invMass"+nameSample,"",40,60,140)
     invMass.append(TH1F('invMass_'+ nameSample, "invariant Mass", 40, 60, 140))
     invMassSel.append(TH1F('invMassSel_'+ nameSample,"invariant Mass",100,100,800))
     NMuons.append(TH1F('NMuons_'+ nameSample,'Muons nb',10,0,10))
     NElectrons.append(TH1F('NElectrons_'+ nameSample,'Electrons nb',10,0,10))
     NPhotons.append(TH1F('NPhotons_'+ nameSample,'Photons nb',10,0,10))
     NJets.append(TH1F('NJets_'+ nameSample,'Jets nb',10,0,10))
+    NBJets.append(TH1F('NBJets_'+ nameSample,'BJets nb',10,0,10))
 
     chain.Add("files/"+nameSample+".root")
     nbEntries = chain.GetEntries()
@@ -103,27 +105,28 @@ for file in AllSample:
         if(nbEntries > 10000 and i % (nbEntries/10) == 0): print "\tProcessing entry {0} / {1} ({2}% done)".format(i, nbEntries, ceil(float(i)/float(nbEntries)*100.))
         chain.GetEntry(i)
         TriggerIsoMu24 = chain.triggerIsoMu24
+        AllMuons = []; nMuon = chain.NMuon
+        AllElectrons = []; nElectron = chain.NElectron
+        AllPhotons = []; nPhoton = chain.NPhoton
+        AllJets = []; nJet = chain.NJet
+        AllBJets = []; nBJet = 0
 
 #######################################
 ## TTBar-like selection
 # Trigger
         if(not TriggerIsoMu24): continue
 # Muon selection
-        AllMuons = []; nMuon = chain.NMuon
         if(nMuon < 1): continue
         FillTheMuonCollection()
         if(AllMuons[0].Pt() < 24.): continue
         if(not (AllMuons[0].IsIsolated())): continue
 # Jet selection
-        AllJets = []; nJet = chain.NJet
         if(nJet < 4): continue
         FillTheJetCollection()
-        if(AllJets[3].Pt() < 20.): continue
+        if(AllJets[3].Pt() < 30.): continue
 # B-tag selection
-#        nbtag = 0
-#        for k in xrange(3):
-#            if(AllJets[k].GetBTagDiscriminator() > 1.): nbtag += 1
-#        if(nbtag < 2): continue
+        for k in xrange(3):
+            if(AllJets[k].GetBTagDiscriminator() > 1.): nBJet += 1
 # MET selection
         FillTheOtherCollections()
         if(met.Pt() < 10.): continue
@@ -131,23 +134,30 @@ for file in AllSample:
         eventWeight = chain.EventWeight
         weight = eventWeight * TriggerIsoMu24 * IntLumiWeight[countFile]
 # construction of TTBar system
-        TTBar = AllMuons[0] + met + AllJets[0] + AllJets[1] + AllJets[2] + AllJets[3]
+        TTBar = AllMuons[0] + AllJets[0] + AllJets[1] + AllJets[2] + AllJets[3]
         invMassSel[countFile].Fill(TTBar.M(), weight)        
+        NMuons[countFile].Fill(nMuon, weight)
+        NElectrons[countFile].Fill(nElectron, weight)
+        NJets[countFile].Fill(nJet, weight)
+        NBJets[countFile].Fill(nBJet, weight)
+#        [countFile].Fill(, weight)
 
 #######################################
     if(countFile > 0):
-        invMassSel[countFile].SetFillColor(countFile)
+        invMassSel[countFile].SetFillColor(SampleColor[countFile])
+        invMassSel[countFile].SetFillStyle(3002)
         hs.Add(invMassSel[countFile])
     countFile = countFile + 1
 
-print ' creating canevas'
+print ' creating canvas'
 c = TCanvas("c", "c", 800, 1000)
+c.clear()
 c.Divide(1,2)
 c.cd(1)
 hs.Draw('hist')
 invMassSel[0].Draw('pesame')
 invMassSel[0].SetMarkerStyle(20)
-invMassSel[0].SetMarkerSize(0.5)
+invMassSel[0].SetMarkerSize(.5)
 c.cd(2)
 gPad.SetLogy(1)
 hs.Draw('hist')
