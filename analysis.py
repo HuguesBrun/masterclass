@@ -1,4 +1,4 @@
-from ROOT import gSystem, gPad
+from ROOT import gSystem, gPad, gROOT
 from ROOT import TChain
 from ROOT import TFile
 from ROOT import TH1F
@@ -6,6 +6,9 @@ from ROOT import THStack
 from ROOT import TCanvas
 from ROOT import TLorentzVector
 import sys
+gROOT.SetBatch()
+
+from math import ceil
 
 # load library with MyClass dictionary
 gSystem.Load( 'MyMuon_C' )
@@ -60,20 +63,21 @@ for file in AllSample:
     nbEntries = chain.GetEntries()
 #    nbEntries = 1000
     for i in xrange(nbEntries):
+        if(i % (nbEntries/10) == 0): print "\tProcessing entry {0} / {1} ({2}% done)".format(i, nbEntries, ceil(float(i)/float(nbEntries)*100.))
         AllMuons = []
         chain.GetEntry(i)
         FillTheObjectCollections()
 
 #######################################
         NMuons[countFile].Fill(chain.NMuon)
-        if(chain.NMuon > 1):
-            opcharge = chain.Muon_Charge[0] * chain.Muon_Charge[1]
-            if(opcharge == -1):
-                if(chain.Muon_Iso[0] < 1):
-                    if(chain.Muon_Iso[1] < 1):
-                        sumMuon = AllMuons[0] + AllMuons[1]
-                        weight = chain.EventWeight * chain.triggerIsoMu24 * IntLumiWeight[countFile]
-                        invMassSel[countFile].Fill(sumMuon.M(), weight)
+        if(chain.NMuon < 2): continue
+        opcharge = chain.Muon_Charge[0] * chain.Muon_Charge[1]
+        if(opcharge != -1): continue
+        if(AllMuons[0].Pt() < 24.): continue
+        if(chain.Muon_Iso[0] > 1 or chain.Muon_Iso[1] > 1): continue
+        sumMuon = AllMuons[0] + AllMuons[1]
+        weight = chain.EventWeight * chain.triggerIsoMu24 * IntLumiWeight[countFile]
+        invMassSel[countFile].Fill(sumMuon.M(), weight)
 
         NElectrons[countFile].Fill(chain.NElectron)
         NPhotons[countFile].Fill(chain.NPhoton)
@@ -89,7 +93,7 @@ for file in AllSample:
         hs.Add(invMassSel[countFile])
     countFile = countFile + 1
 
-print ' creating canavas'
+print ' creating canevas'
 c = TCanvas("c", "c", 800, 1000)
 c.Divide(1,2)
 c.cd(1)
