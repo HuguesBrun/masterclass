@@ -75,8 +75,9 @@ NPhotons = []
 NJets = []
 NBJets = []
 MET = []
+MWlnuT = []
 ## defining the plots to be drawn
-allPlots = [invMassSel, NMuons, NElectrons, NPhotons, NJets, NBJets, MET]
+allPlots = [invMassSel, NMuons, NElectrons, NPhotons, NJets, NBJets, MET, MWlnuT]
 
 hadB = TLorentzVector()
 lepB = TLorentzVector()
@@ -95,7 +96,8 @@ hs_NPhotons = THStack('hs_NPhotons','hs_NPhotons')
 hs_NJets = THStack('hs_NJets','hs_NJets')
 hs_NBJets = THStack('hs_NBJets','hs_NBJets')
 hs_MET = THStack('hs_MET','hs_MET')
-allStacks = [hs_invMassSel, hs_NMuons, hs_NElectrons, hs_NPhotons, hs_NJets, hs_NBJets, hs_MET]
+hs_MWlnuT = THStack('hs_MWlnuT', 'hs_MWlnuT')
+allStacks = [hs_invMassSel, hs_NMuons, hs_NElectrons, hs_NPhotons, hs_NJets, hs_NBJets, hs_MET, hs_MWlnuT]
 
 for file in AllSample:
     nameSample = AllSample[countFile]
@@ -111,6 +113,7 @@ for file in AllSample:
     NJets.append(TH1F('NJets_'+ nameSample,'Jets nb',10,0,10))
     NBJets.append(TH1F('NBJets_'+ nameSample,'BJets nb',10,0,10))
     MET.append(TH1F('MET_'+ nameSample,'MET',50,0,200))
+    MWlnuT.append(TH1F('MWlnuT_'+ nameSample,'MWlnuT',50,0,500))
 
     chain.Add("files/"+nameSample+".root")
     nbEntries = chain.GetEntries()
@@ -120,7 +123,8 @@ for file in AllSample:
         chain.GetEntry(i)
         TriggerIsoMu24 = chain.triggerIsoMu24
 #######################################
-## TTBar-like selection
+## Very Loose selection: one isolated muon + 2 jets
+#######################################
 # Trigger
         if(not TriggerIsoMu24): continue
 # Muon selection
@@ -132,14 +136,16 @@ for file in AllSample:
         if(not (AllMuons[0].IsIsolated())): continue
 # Jet selection
         nJet = chain.NJet
-
-        if(nJet < 4): continue
+        if(nJet < 2): continue
         AllJets = []
         FillTheJetCollection()
-        if(AllJets[3].Pt() < 30.): continue
+        if(AllJets[1].Pt() < 30.): continue
+#######################################
+## Filling the variables
+#######################################
 # B-tag selection
         nBJet = 0
-        for k in xrange(3):
+        for k in xrange(nJet):
             if(AllJets[k].GetBTagDiscriminator() > 1.): nBJet += 1
 # MET selection
         FillTheOtherCollections()
@@ -149,16 +155,18 @@ for file in AllSample:
         nPhoton = chain.NPhoton
         eventWeight = chain.EventWeight
         weight = eventWeight * TriggerIsoMu24 * IntLumiWeight[countFile]
-# construction of TTBar system
-        TTBar = AllMuons[0] + AllJets[0] + AllJets[1] + AllJets[2] + AllJets[3]
 # fill plots
-        invMassSel[countFile].Fill(TTBar.M(), weight)        
         NMuons[countFile].Fill(nMuon, weight)
         NElectrons[countFile].Fill(nElectron, weight)
         NPhotons[countFile].Fill(nPhoton, weight)
         NJets[countFile].Fill(nJet, weight)
         NBJets[countFile].Fill(nBJet, weight)
         MET[countFile].Fill(met.Pt(), weight)
+#######################################
+## Additional selection for the hadronic W decays
+#######################################
+        Wlnu = (AllMuons[0] + met)
+        MWlnuT[countFile].Fill(Wlnu.Mt(), weight)
 #        [countFile].Fill(, weight)
 
 #######################################
